@@ -1,0 +1,28 @@
+{
+    "name": "lcloss/simple-permission",
+    "description": "Authorizations schema for Laravel projects",
+    "type": "package",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lcloss\\SimplePermission\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lcloss\\SimplePermission\\SimplePermissionServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "lcloss",
+            "email": "lcloss@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "livewire/livewire": "v2.12.6"
+    }
+}
