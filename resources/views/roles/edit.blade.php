@@ -76,7 +76,7 @@
                                                     <div class="row">
                                                     @foreach( $permissions as $id => $permission )
                                                         <div class="col-md-12">
-                                                            <input type="checkbox" name="permissions[]" id="permission-{{ $id }}" class="form-check-input"
+                                                            <input type="checkbox" name="permissions[]" id="permission-{{ $id }}" class="form-check-input" value="{{ $id }}"
                                                                    {{ old('permissions', $role->permissions->pluck('id')->toArray() ) ? ( collect( old('permissions', $role->permissions->pluck('id')->toArray() ))->contains( $id ) ? 'checked="checked"' : '' ) : '' }}>
                                                             <label for="permission-{{ $permission . '-' . $id }}" class="form-check-label">{{ __($permission) }}</label>
                                                         </div>

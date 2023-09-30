@@ -78,7 +78,7 @@
                                             <div class="row mb-3">
                                             @foreach( $roles as $id => $role )
                                             <div class="col-md-12">
-                                                <input type="checkbox" name="roles[]" id="role-{{ $id }}" class="form-check-input"
+                                                <input type="checkbox" name="roles[]" id="role-{{ $id }}" class="form-check-input" value="{{ $id }}"
                                                     {{ old('roles', $user->roles->pluck('id')->toArray() ) ? ( collect( old('roles', $user->roles->pluck('id')->toArray() ))->contains( $id ) ? 'checked="checked"' : '' ) : '' }}>
                                                 <label for="role-{{ $role . '-' . $id }}" class="form-check-label">{{ __($role) }}</label>
                                             </div>
