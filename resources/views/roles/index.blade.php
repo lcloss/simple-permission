@@ -22,6 +22,7 @@
                                 @endcan
                             </div>
                         </div>
+                        @include('simple-permission::partials.show-errors')
                         <div class="card mb-3">
                             <div class="card-header">
                                 <h3>{{ __('Roles') }}</h3>
