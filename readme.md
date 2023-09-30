@@ -13,14 +13,19 @@ With this package, Roles and Permissions are added to your Laravel application, 
     php artisan vendor:publish --provider="Lcloss\SimplePermission\SimplePermissionServiceProvider"
     ```
    
-3. Run the migrations:
+3. Compile assets:
+    ```bash
+    npm run build
+    ```
+   
+4. Run the migrations:
     ```bash
     php artisan migrate
     ```
    
-4. Add the `HasRoles` trait to your `User` model:
+5. Add the `HasRoles` trait to your `User` model:
     ```php
-    use Lcloss\SimplePermission\Traits\HasRoles;
+    use Lcloss\SimplePermission\Models\Traits\HasRoles;
    
     class User extends Authenticatable
     {
@@ -28,21 +33,52 @@ With this package, Roles and Permissions are added to your Laravel application, 
     }
     ```
 
-5. Add the `AuthGate` middleware to your `app\Http\Kernel.php` file:
+6. Add the `AuthGates` middleware to your `app\Http\Kernel.php` file:
     ```php
     protected $middlewareGroups = [
         'web' => [
             // ...
-            \Lcloss\SimplePermission\Http\Middleware\AuthGate::class,
+            \Lcloss\SimplePermission\Http\Middleware\AuthGates::class,
         ],
 
         'api' => [
             // ...
-            \Lcloss\SimplePermission\Http\Middleware\AuthGate::class,
+            \Lcloss\SimplePermission\Http\Middleware\AuthGates::class,
         ],
     ];
     ```
    
+7. Add the `role` to the `user`
+If you are using Laravel Fortify, you can chane App\Actions\Fortify\CreateNewUser.php file:
+    ```php
+    use Lcloss\SimplePermission\Models\Role;
+   
+    class CreateNewUser
+    {
+        // ...
+        public function create(array $input)
+        {
+            // ...
+            $user = User::create([
+                'name' => $name,
+                'email' => $input['email'],
+                'password' => Hash::make($input['password']),
+            ]);
+
+            if ( User::count() == 1 ) {
+                $role = Role::where('slug', 'sysadmin')->first();
+            } else {
+                $role = Role::where('slug', 'user')->first();
+            }
+
+            $user->roles()->attach($role);
+
+            return $user;
+        }
+    }
+    ```
+   With the configuration above, the first user created will be a `sysadmin`, and the others will be `user`.
+
 ## Configuration
 
 You can change this package's configuration by editing the `config/simple-permission.php` file.
