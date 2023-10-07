@@ -59,25 +59,43 @@ If you are using Laravel Fortify, you can chane App\Actions\Fortify\CreateNewUse
         public function create(array $input)
         {
             // ...
+            // If you are getting the first and last names:
+            $name = trim($input['first_name'] . ' ' . $input['last_name']);
+   
+            DB::beginTransaction();
+   
             $user = User::create([
-                'name' => $name,
-                'email' => $input['email'],
-                'password' => Hash::make($input['password']),
+                'name'      => $name,
+                'email'     => $input['email'],
+                'password'  => Hash::make($input['password']),
             ]);
 
-            if ( User::count() == 1 ) {
+            $countUsers = User::count();
+   
+            if ( $countUsers == 1 ) {
                 $role = Role::where('slug', 'sysadmin')->first();
             } else {
                 $role = Role::where('slug', 'user')->first();
             }
-
             $user->roles()->attach($role);
 
+            DB::commit();
+   
             return $user;
         }
     }
     ```
    With the configuration above, the first user created will be a `sysadmin`, and the others will be `user`.
+
+8. Other considerations
+
+Check package blade files. 
+You can use your own blade files by replacing the blade file names in `config/simple-permission.php` file.
+Do not forget to:
+
+a) Add @liwewireStyles() and @livewireScripts() to your layout file.
+b) Add @yield('scripts') to your layout file.
+c) Add @yield('modals') to the end of body, on the layout file.
 
 ## Configuration
 
@@ -94,8 +112,8 @@ php artisan db:seed --class=SimplePermissionSeeder
 Or, you can run individual seeders:
 
 ```bash
-php artisan db:seed --class=SimplePermissionRolesSeeder
-php artisan db:seed --class=SimplePermissionPermissionsSeeder
+php artisan db:seed --class=SimplePermissionRoleSeeder
+php artisan db:seed --class=SimplePermissionPermissionSeeder
 ```
 
 ## Roles and Permissions
@@ -108,7 +126,7 @@ Each role has a single identification `slug` and a `level` to determine the role
 Roles with `level` 1 are the highest level roles, and roles with `level` 300 are the lowest level roles.
 All roles with `level` 1 get access to all permissions.
 
-You can customize the roles by editing the `database\seeders\SimplePermissionRolesSeeder.php` file.
+You can customize the roles by editing the `database\seeders\SimplePermissionRoleSeeder.php` file.
 
 ### Permissions
 
@@ -121,7 +139,7 @@ An action is an operation on the resource, like `access`, `list`, `create`, `rea
 
 So, the permission `users_create` determine if the user can create users, and the permission `users_list` determine if the user can list users.
 
-You can customize the permissions by editing the `database\seeders\SimplePermissionPermissionsSeeder.php` file.
+You can customize the permissions by editing the `database\seeders\SimplePermissionPermissionSeeder.php` file.
 
 To protect a route, you can use the `can` middleware:
 ```php
