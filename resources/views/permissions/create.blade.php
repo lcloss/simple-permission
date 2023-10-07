@@ -38,7 +38,7 @@
                                                 <div class="col-md-12">
                                                     <label for="name" class="form-label">{{ __('Name') }}</label>
                                                     <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}">
-                                                    <div><span class="text-sm">{{ __('Type complete name or type prefix and select actions above.') }}</span></div>
+                                                    <div><span class="text-sm">{{ __('Type complete name or type prefix and select actions bellow.') }}</span></div>
                                                     @if( $errors->has('name') )
                                                     <div class="alert alert-danger">{{ $errors->first('name') }}</div>
                                                     @endif

@@ -13,14 +13,19 @@ With this package, Roles and Permissions are added to your Laravel application, 
     php artisan vendor:publish --provider="Lcloss\SimplePermission\SimplePermissionServiceProvider"
     ```
    
-3. Run the migrations:
+3. Compile assets:
+    ```bash
+    npm run build
+    ```
+   
+4. Run the migrations:
     ```bash
     php artisan migrate
     ```
    
-4. Add the `HasRoles` trait to your `User` model:
+5. Add the `HasRoles` trait to your `User` model:
     ```php
-    use Lcloss\SimplePermission\Traits\HasRoles;
+    use Lcloss\SimplePermission\Models\Traits\HasRoles;
    
     class User extends Authenticatable
     {
@@ -28,21 +33,70 @@ With this package, Roles and Permissions are added to your Laravel application, 
     }
     ```
 
-5. Add the `AuthGate` middleware to your `app\Http\Kernel.php` file:
+6. Add the `AuthGates` middleware to your `app\Http\Kernel.php` file:
     ```php
     protected $middlewareGroups = [
         'web' => [
             // ...
-            \Lcloss\SimplePermission\Http\Middleware\AuthGate::class,
+            \Lcloss\SimplePermission\Http\Middleware\AuthGates::class,
         ],
 
         'api' => [
             // ...
-            \Lcloss\SimplePermission\Http\Middleware\AuthGate::class,
+            \Lcloss\SimplePermission\Http\Middleware\AuthGates::class,
         ],
     ];
     ```
    
+7. Add the `role` to the `user`
+If you are using Laravel Fortify, you can chane App\Actions\Fortify\CreateNewUser.php file:
+    ```php
+    use Lcloss\SimplePermission\Models\Role;
+   
+    class CreateNewUser
+    {
+        // ...
+        public function create(array $input)
+        {
+            // ...
+            // If you are getting the first and last names:
+            $name = trim($input['first_name'] . ' ' . $input['last_name']);
+   
+            DB::beginTransaction();
+   
+            $user = User::create([
+                'name'      => $name,
+                'email'     => $input['email'],
+                'password'  => Hash::make($input['password']),
+            ]);
+
+            $countUsers = User::count();
+   
+            if ( $countUsers == 1 ) {
+                $role = Role::where('slug', 'sysadmin')->first();
+            } else {
+                $role = Role::where('slug', 'user')->first();
+            }
+            $user->roles()->attach($role);
+
+            DB::commit();
+   
+            return $user;
+        }
+    }
+    ```
+   With the configuration above, the first user created will be a `sysadmin`, and the others will be `user`.
+
+8. Other considerations
+
+Check package blade files. 
+You can use your own blade files by replacing the blade file names in `config/simple-permission.php` file.
+Do not forget to:
+
+a) Add @liwewireStyles() and @livewireScripts() to your layout file.
+b) Add @yield('scripts') to your layout file.
+c) Add @yield('modals') to the end of body, on the layout file.
+
 ## Configuration
 
 You can change this package's configuration by editing the `config/simple-permission.php` file.
@@ -58,8 +112,8 @@ php artisan db:seed --class=SimplePermissionSeeder
 Or, you can run individual seeders:
 
 ```bash
-php artisan db:seed --class=SimplePermissionRolesSeeder
-php artisan db:seed --class=SimplePermissionPermissionsSeeder
+php artisan db:seed --class=SimplePermissionRoleSeeder
+php artisan db:seed --class=SimplePermissionPermissionSeeder
 ```
 
 ## Roles and Permissions
@@ -72,7 +126,7 @@ Each role has a single identification `slug` and a `level` to determine the role
 Roles with `level` 1 are the highest level roles, and roles with `level` 300 are the lowest level roles.
 All roles with `level` 1 get access to all permissions.
 
-You can customize the roles by editing the `database\seeders\SimplePermissionRolesSeeder.php` file.
+You can customize the roles by editing the `database\seeders\SimplePermissionRoleSeeder.php` file.
 
 ### Permissions
 
@@ -85,7 +139,7 @@ An action is an operation on the resource, like `access`, `list`, `create`, `rea
 
 So, the permission `users_create` determine if the user can create users, and the permission `users_list` determine if the user can list users.
 
-You can customize the permissions by editing the `database\seeders\SimplePermissionPermissionsSeeder.php` file.
+You can customize the permissions by editing the `database\seeders\SimplePermissionPermissionSeeder.php` file.
 
 To protect a route, you can use the `can` middleware:
 ```php
